@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LP-25 — Recent/Big Winners Widget Test Plan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      line-height: 1.6;
+    }
+    .header {
+      background: #1a1a2e;
+      color: white;
+      padding: 40px 48px 32px;
+    }
+    .header .label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #6e9bff;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .header-meta span strong { color: #eee; }
+    .context-box {
+      background: #0f3460;
+      border-left: 4px solid #6e9bff;
+      margin: 0 48px;
+      margin-top: -1px;
+      padding: 20px 24px;
+      font-size: 13px;
+      color: #ccc;
+    }
+    .context-box strong { color: white; }
+    .context-box a { color: #6e9bff; }
+    .context-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 32px;
+      margin-top: 12px;
+    }
+    .context-grid div { display: flex; gap: 8px; }
+    .context-grid .key { color: #888; min-width: 90px; }
+    .context-grid .val { color: #ddd; }
+    .recommendation {
+      margin: 24px 48px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 14px;
+    }
+    .recommendation strong { color: #e65100; }
+    main { padding: 0 48px 64px; }
+    .section {
+      background: white;
+      border-radius: 12px;
+      margin-top: 24px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .section-header {
+      background: #f0f4ff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e0e8ff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-header .num {
+      background: #1a1a2e;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .section-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .section-header .tag {
+      margin-left: auto;
+      background: #e8eeff;
+      color: #3451b2;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+    .section-body { padding: 24px; }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .meta-item .meta-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .meta-item .meta-val { font-size: 14px; color: #1d1d1f; }
+    .rq-list { list-style: none; counter-reset: rq; }
+    .rq-list li {
+      counter-increment: rq;
+      padding: 10px 12px 10px 44px;
+      position: relative;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .rq-list li:last-child { border-bottom: none; }
+    .rq-list li::before {
+      content: "RQ" counter(rq);
+      position: absolute;
+      left: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #6e9bff;
+      background: #f0f4ff;
+      padding: 2px 5px;
+      border-radius: 4px;
+      top: 12px;
+    }
+    .study-tabs {
+      display: flex;
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 24px;
+    }
+    .study-tab {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: default;
+    }
+    .study-tab.active { color: #1a1a2e; border-bottom-color: #1a1a2e; }
+    .card {
+      background: #f8f9ff;
+      border: 1px solid #e4e8f5;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .card-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      background: #3451b2;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .card-type {
+      font-size: 11px;
+      color: #666;
+      background: #eee;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-body { font-size: 13px; }
+    .card-body p { margin-bottom: 6px; }
+    .card-body .field { display: flex; gap: 8px; margin-bottom: 6px; }
+    .card-body .field .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      min-width: 110px;
+      padding-top: 1px;
+    }
+    .card-body .field .field-val { font-size: 13px; }
+    .card-body .internal {
+      background: #fff9e6;
+      border-left: 3px solid #f0c040;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #7a6000;
+      margin-top: 8px;
+      border-radius: 0 4px 4px 0;
+    }
+    .options-list { list-style: none; margin-top: 8px; }
+    .options-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .options-list li:last-child { border-bottom: none; }
+    .qualify {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .disqualify {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #fce4ec;
+      color: #c62828;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    th {
+      background: #f0f4ff;
+      color: #3451b2;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    .checklist { list-style: none; }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 14px;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li::before {
+      content: "☐";
+      font-size: 16px;
+      color: #aaa;
+      flex-shrink: 0;
+    }
+    .flag {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #e65100;
+      margin-top: 16px;
+    }
+    .flag strong { display: block; margin-bottom: 4px; }
+    .lang-table td:first-child { font-family: 'SF Mono', monospace; font-size: 12px; color: #c62828; }
+    .lang-table td:nth-child(2) { font-style: italic; color: #2e7d32; }
+    blockquote {
+      border-left: 3px solid #6e9bff;
+      padding: 8px 16px;
+      margin: 12px 0;
+      background: #f8f9ff;
+      font-size: 13px;
+      color: #444;
+      border-radius: 0 4px 4px 0;
+    }
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 20px 0;
+    }
+    h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+    .success-items {
+      list-style: none;
+    }
+    .success-items li {
+      padding: 6px 0;
+      padding-left: 20px;
+      position: relative;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .success-items li:last-child { border-bottom: none; }
+    .success-items li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #6e9bff;
+      font-weight: 700;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 768px) {
+      .header, main, .context-box, .recommendation { padding-left: 20px; padding-right: 20px; }
+      .two-col { grid-template-columns: 1fr; }
+      .context-grid { grid-template-columns: 1fr; }
+      .meta-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="label">UserTesting Plan · LP-25</div>
+  <h1>Recent/Big Winners Widget</h1>
+  <div class="header-meta">
+    <span><strong>PM:</strong> Ashley Enyeart</span>
+    <span><strong>Designer(s):</strong> Danny Chew, Drew Sullivan</span>
+    <span><strong>Squad:</strong> [LOT] Consumer Shop</span>
+    <span><strong>Quarter:</strong> 2026 Q3</span>
+    <span><strong>Slack:</strong> #lottery-proj-recent-winners</span>
+  </div>
+</div>
+
+<div class="context-box">
+  <strong>Initiative context pulled from JPD</strong>
+  <div class="context-grid">
+    <div><span class="key">Status</span><span class="val">Awaiting Kick Off · Discovery</span></div>
+    <div><span class="key">Priority</span><span class="val">Top 11–20</span></div>
+    <div><span class="key">Target Start</span><span class="val">2026-06-08</span></div>
+    <div><span class="key">Target End</span><span class="val">2026-07-03</span></div>
+    <div><span class="key">Prototype</span><span class="val"><a href="https://www.figma.com/design/muyNmGOo5GoX05DK3vR1xR/Big-Winner-Widget" target="_blank">Figma: Big-Winner-Widget ↗</a></span></div>
+    <div><span class="key">One Pager</span><span class="val"><a href="https://n8n.dev.dkng.tools/webhook/recent-winners-one-pager-v2" target="_blank">recent-winners-one-pager-v2 ↗</a></span></div>
+  </div>
+</div>
+
+<div class="recommendation">
+  <strong>Methodology: First Impression → Unmoderated Usability (2-study package)</strong><br>
+  The PRD flags "anonymization reads as inconsistent" as a key risk requiring pre-launch research. Study A validates the trust/credibility hook at a glance. Study B tests comprehension and navigation once a prototype is available.
+</div>
+
+<main>
+
+  <!-- STUDY OVERVIEW -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">1</div>
+      <h2>Study Overview</h2>
+    </div>
+    <div class="section-body">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="meta-label">Study name</div>
+          <div class="meta-val">LP-25 — Big Winners Widget: Trust Perception + Usability</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Study design</div>
+          <div class="meta-val">Study A: First Impression (5-sec) + Study B: Unmoderated Usability</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Session length</div>
+          <div class="meta-val">Study A: ~5 min · Study B: 15–18 min</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Timeline</div>
+          <div class="meta-val">Launch: 2026-06-08 · Results needed: 2026-06-20</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Device</div>
+          <div class="meta-val">Mobile (iOS + Android)</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Participants</div>
+          <div class="meta-val">Study A: 15–20 · Study B: 5–8</div>
+        </div>
+      </div>
+      <h3>Research Questions</h3>
+      <ul class="rq-list">
+        <li>Does the Winners Widget register as trustworthy and credible at a glance, given anonymized win data?</li>
+        <li>Do users understand what the widget is showing — real wins, real games — without a player name attached?</li>
+        <li>Can users successfully interact with a winner card and navigate to the relevant game?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SCREENER QUESTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">2</div>
+      <h2>Screener Questions</h2>
+    </div>
+    <div class="section-body">
+      <div class="study-tabs">
+        <div class="study-tab active">Study A + B (shared)</div>
+        <div class="study-tab">Study B only (Q5)</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">Q1</span>
+          <span class="card-type">Multiple Choice</span>
+          <span class="card-title">Behavioral qualifier</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"Which of the following have you done on a mobile app in the last 90 days?"</span></div>
+          <ul class="options-list">
+            <li>Purchased a lottery ticket online or through an app <span class="qualify">Qualify</span></li>
+            <li>Placed a sports bet <span class="qualify">Qualify</span></li>
+            <li>Played a casino game online <span class="qualify">Qualify</span></li>
+            <li>Ordered food delivery <span class="disqualify">Disqualify</span></li>
+            <li>None of these <span class="disqualify">Disqualify</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">Q2</span>
+          <span class="card-type">Multiple Choice</span>
+          <span class="card-title">Lottery frequency</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"How often do you typically buy lottery tickets (online, in-app, or in-store)?"</span></div>
+          <ul class="options-list">
+            <li>A few times a week or more <span class="qualify">Qualify</span></li>
+            <li>About once a week <span class="qualify">Qualify</span></li>
+            <li>A few times a month <span class="qualify">Qualify</span></li>
+            <li>Once a month or less <span class="qualify">Qualify</span></li>
+            <li>I don't buy lottery tickets <span class="disqualify">Disqualify</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">Q3</span>
+          <span class="card-type">Multiple Choice</span>
+          <span class="card-title">Device type</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What type of mobile phone do you use as your primary device?"</span></div>
+          <ul class="options-list">
+            <li>iPhone <span class="qualify">Qualify</span></li>
+            <li>Android <span class="qualify">Qualify</span></li>
+            <li>I don't use a smartphone <span class="disqualify">Disqualify</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">Q4</span>
+          <span class="card-type">Multiple Choice</span>
+          <span class="card-title">Attention check</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"Please select 'Somewhat agree' to confirm you are reading carefully."</span></div>
+          <ul class="options-list">
+            <li>Strongly agree <span class="disqualify">Disqualify</span></li>
+            <li>Somewhat agree <span class="qualify">Qualify</span></li>
+            <li>Neither agree nor disagree <span class="disqualify">Disqualify</span></li>
+            <li>Somewhat disagree <span class="disqualify">Disqualify</span></li>
+            <li>Strongly disagree <span class="disqualify">Disqualify</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">Q5</span>
+          <span class="card-type">Multiple Choice · Select all that apply</span>
+          <span class="card-title">App familiarity <em style="font-weight:400;color:#888">(Study B only)</em></span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"Which of these apps have you used in the last 6 months? Select all that apply."</span></div>
+          <ul class="options-list">
+            <li>Jackpocket <span class="qualify">Qualify</span> <span style="font-size:11px;color:#888">tag: JP user</span></li>
+            <li>DraftKings <span class="qualify">Qualify</span> <span style="font-size:11px;color:#888">tag: DK user</span></li>
+            <li>FanDuel <span class="qualify">Qualify</span></li>
+            <li>TheLotter or Lottery.com <span class="qualify">Qualify</span></li>
+            <li>I haven't used any of these <span class="qualify">Qualify</span> <span style="font-size:11px;color:#888">tag: fresh perspective</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">3</div>
+      <h2>Task Plan</h2>
+    </div>
+    <div class="section-body">
+
+      <h3 style="margin-bottom:16px;">Study A — First Impression (5-Second Test)</h3>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">EXPOSURE</span>
+          <span class="card-type">5-Second Screen Flash</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Screen</span><span class="field-val">Big Winner Widget — Jackpocket home screen with widget visible (export from Figma: muyNmGOo5GoX05DK3vR1xR)</span></div>
+          <div class="field"><span class="field-label">Duration</span><span class="field-val">5 seconds</span></div>
+          <div class="field"><span class="field-label">Instructions</span><span class="field-val">"You're about to see a screen from a lottery app. It will only appear for 5 seconds. Look carefully — you won't be able to go back."</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">A1</span>
+          <span class="card-type">Written Response</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What do you remember seeing on that screen?"</span></div>
+          <div class="internal">🔍 Internal: Open recall — what registers most strongly; is the widget prominent?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">A2</span>
+          <span class="card-type">Written Response</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What was the main purpose of the section showing recent wins?"</span></div>
+          <div class="internal">🔍 Internal: Comprehension — does the widget's social-proof purpose land?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">A3</span>
+          <span class="card-type">Written Response</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What stood out to you most — if anything?"</span></div>
+          <div class="internal">🔍 Internal: Visual salience — widget vs. other home elements</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">A4</span>
+          <span class="card-type">Multiple Choice</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"The wins shown in that section — how real did they feel to you?"</span></div>
+          <ul class="options-list">
+            <li>Very real — I believe these are actual wins</li>
+            <li>Somewhat real</li>
+            <li>Not sure — I couldn't tell</li>
+            <li>Not real — felt made up or generic</li>
+          </ul>
+          <div class="internal">🔍 Internal: Trust/credibility signal for social proof hypothesis</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">A5</span>
+          <span class="card-type">Written Response</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"Did you notice any information was missing from the winner cards — like a name or location? What did you expect to see?"</span></div>
+          <div class="internal">🔍 Internal: Anonymization perception — does absence of name feel intentional (privacy-protecting) or suspicious (incomplete)?</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <h3 style="margin-bottom:16px;">Study B — Unmoderated Usability Test</h3>
+
+      <div class="flag">
+        <strong>⚠️ Prototype fidelity check required</strong>
+        Confirm with Danny/Drew that the Figma prototype is interactive before launching Study B. If still static, reframe Tasks 3 and 4 as: "Point to where you would tap to [goal]. What would you expect to happen?"
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <span class="card-num">B1</span>
+          <span class="card-type">Navigate to URL + Verbal Response</span>
+          <span style="margin-left:auto;font-size:11px;color:#888">~2 min</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">URL</span><span class="field-val">Figma prototype (public share from muyNmGOo5GoX05DK3vR1xR)</span></div>
+          <div class="field"><span class="field-label">Scenario</span><span class="field-val">"Imagine you just downloaded a lottery app and you're opening it for the first time."</span></div>
+          <div class="field"><span class="field-label">Instruction</span><span class="field-val">"Take a look at this home screen. Don't tap anything yet — just look around and tell me out loud what you notice."</span></div>
+          <div class="field"><span class="field-label">Success</span><span class="field-val">Participant notices the winners section without prompting</span></div>
+          <div class="internal">🔍 Internal: Unprompted widget discovery; what draws attention first; any immediate confusion</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">B2</span>
+          <span class="card-type">Verbal Response (Think Aloud)</span>
+          <span style="margin-left:auto;font-size:11px;color:#888">~2 min</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Instruction</span><span class="field-val">"Looking at the section showing recent wins — what do you think it's showing you? Talk me through what you understand about it."</span></div>
+          <div class="field"><span class="field-label">Success</span><span class="field-val">Participant correctly identifies it as real, recent wins from other players</span></div>
+          <div class="internal">🔍 Internal: Comprehension of widget purpose; how users interpret the anonymized card format (state name vs. no player line)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">B3</span>
+          <span class="card-type">Verbal Response (Think Aloud)</span>
+          <span style="margin-left:auto;font-size:11px;color:#888">~3 min</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Scenario</span><span class="field-val">"You're thinking about playing Powerball this week."</span></div>
+          <div class="field"><span class="field-label">Instruction</span><span class="field-val">"Show me how you'd use this screen to find Powerball. Please think out loud as you go."</span></div>
+          <div class="field"><span class="field-label">Success</span><span class="field-val">Participant taps a winner card or navigates to Powerball detail</span></div>
+          <div class="internal">🔍 Internal: Can users tap a winner card to navigate to a game? Do they understand the card is tappable?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">B4</span>
+          <span class="card-type">Verbal Response (Think Aloud)</span>
+          <span style="margin-left:auto;font-size:11px;color:#888">~2 min</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Scenario</span><span class="field-val">"You see a card that says someone in New York just won $50,000 on Powerball."</span></div>
+          <div class="field"><span class="field-label">Instruction</span><span class="field-val">"What would you expect to happen if you tapped on that card? Go ahead and try it."</span></div>
+          <div class="field"><span class="field-label">Success</span><span class="field-val">Participant correctly anticipates or successfully reaches game detail page</span></div>
+          <div class="internal">🔍 Internal: Navigation comprehension; does "New York" on the card register as a trust signal or create confusion?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-num">B5</span>
+          <span class="card-type">Written Response</span>
+          <span style="margin-left:auto;font-size:11px;color:#888">~2 min</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Instruction</span><span class="field-val">"You just saw win cards that showed a state name (like 'New York') but no player name. Why do you think the app shows it that way?"</span></div>
+          <div class="field"><span class="field-label">Success</span><span class="field-val">Response indicates understanding that winner privacy is protected</span></div>
+          <div class="internal">🔍 Internal: Mental model for anonymization — protective / incomplete / suspicious?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLLOW-UP QUESTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">4</div>
+      <h2>Follow-Up Questions</h2>
+      <span class="tag">Study B</span>
+    </div>
+    <div class="section-body">
+      <div class="card">
+        <div class="card-header"><span class="card-num">FU1</span><span class="card-type">Rating Scale 1–7</span></div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"Overall, how much do you trust that the wins shown in that section are from real people playing the app?"</span></div>
+          <div class="field"><span class="field-label">Scale</span><span class="field-val">1 = Don't trust at all → 7 = Trust completely</span></div>
+          <div class="internal">Maps to RQ1: Trust/credibility</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-num">FU2</span><span class="card-type">Rating Scale 1–7</span></div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"How easy or difficult was it to understand what the winners section was showing you?"</span></div>
+          <div class="field"><span class="field-label">Scale</span><span class="field-val">1 = Very difficult → 7 = Very easy</span></div>
+          <div class="internal">SEQ for widget comprehension — maps to RQ2</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-num">FU3</span><span class="card-type">Verbal Response</span></div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What, if anything, was confusing or felt off about the winners section?"</span></div>
+          <div class="internal">Open friction capture; surfaces anonymization concerns not anticipated</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-num">FU4</span><span class="card-type">Verbal Response</span></div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"What, if anything, made the winners section feel valuable or useful?"</span></div>
+          <div class="internal">Positive signal on social proof value; maps to one-pager hypothesis</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-num">FU5</span><span class="card-type">Rating Scale 1–7</span></div>
+        <div class="card-body">
+          <div class="field"><span class="field-label">Question</span><span class="field-val">"After seeing recent wins from other players, how likely are you to place a lottery order in this app?"</span></div>
+          <div class="field"><span class="field-label">Scale</span><span class="field-val">1 = Not at all likely → 7 = Extremely likely</span></div>
+          <div class="internal">Purchase intent / influence signal — maps directly to PRD primary KPI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PILOT CHECKLIST -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">5</div>
+      <h2>Pilot Checklist</h2>
+    </div>
+    <div class="section-body">
+      <ul class="checklist">
+        <li>Figma prototype is on public share link (no DraftKings login required)</li>
+        <li>All card tap flows route to a game detail screen in the prototype</li>
+        <li>Widget renders with at least 3–4 cards visible (not empty state)</li>
+        <li>Both multi-state cards (showing state name) and state-specific cards (no player line) are present in the prototype</li>
+        <li>Tasks B3 and B4 are completable — run through them end-to-end before launch</li>
+        <li>No task instruction reveals the "correct" interaction path</li>
+        <li>Screener logic reviewed: disqualify logic set correctly for Q1, Q2, Q4</li>
+        <li>Session length verified at ≤20 min with think-aloud buffer</li>
+        <li>Ashley (PM) has reviewed task wording</li>
+        <li>Danny/Drew (Design) confirmed prototype fidelity and approved task framing</li>
+        <li>Findings to be shared in #lottery-proj-recent-winners</li>
+      </ul>
+      <div class="flag" style="margin-top:16px;">
+        <strong>⚠️ Prototype fidelity flag</strong>
+        If the Figma file is still static at launch, reframe Tasks B3 and B4 as: "Point to where you would tap to [goal]. What would you expect to happen?" — and note in results that behavioral completion data is unavailable.
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS PLAN -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">6</div>
+      <h2>Analysis Plan</h2>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Research Question</th>
+            <th>Task(s)</th>
+            <th>Metric</th>
+            <th>Threshold</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>RQ1: Does the widget register as trustworthy?</td>
+            <td>Study A — Q4, FU1</td>
+            <td>% rating "real"; mean trust score (1–7)</td>
+            <td>≥60% "real"; mean ≥5.0</td>
+          </tr>
+          <tr>
+            <td>RQ2: Do users understand the anonymous card format?</td>
+            <td>Tasks B2, B5, FU2</td>
+            <td>Comprehension rate; mean ease score</td>
+            <td>≥80% correct interpretation; mean ≥5.0</td>
+          </tr>
+          <tr>
+            <td>RQ3: Can users tap through to a game?</td>
+            <td>Tasks B3, B4</td>
+            <td>Task completion rate</td>
+            <td>≥80% success without prompting</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="divider"></div>
+      <h3>Qualitative coding plan</h3>
+      <ul class="success-items">
+        <li>Top friction themes from FU3 (severity: Low / Medium / High)</li>
+        <li>Anonymization perception: <strong>Protective</strong> / <strong>Incomplete</strong> / <strong>Suspicious</strong> / <strong>Neutral</strong></li>
+        <li>Widget mental model: <strong>Social proof</strong> / <strong>Marketing</strong> / <strong>Random</strong> / <strong>Unsure</strong></li>
+      </ul>
+      <div class="flag" style="background:#f3f8ff;border-color:#90caf9;color:#0d47a1;margin-top:16px;">
+        <strong>📊 Key cross-task signal to watch</strong>
+        If trust scores (FU1) are high but anonymization perception (Task B5) skews "Incomplete" or "Suspicious," credibility is coming from something other than the win cards — investigate which element is actually driving it.
+      </div>
+    </div>
+  </div>
+
+  <!-- LANGUAGE DECISIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="num">7</div>
+      <h2>Language Decisions</h2>
+    </div>
+    <div class="section-body">
+      <table class="lang-table">
+        <thead>
+          <tr>
+            <th>Internal term</th>
+            <th>Participant-facing equivalent</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Widget</td>
+            <td>"the section showing recent wins" / "that section"</td>
+            <td>Customers don't think in widget terms</td>
+          </tr>
+          <tr>
+            <td>Winners Feed / carousel</td>
+            <td>"the scrolling section" / "those win cards"</td>
+            <td>Carousel is a UI term; describe functionally</td>
+          </tr>
+          <tr>
+            <td>Social proof</td>
+            <td>"seeing that other people are winning"</td>
+            <td>Concept, not a label</td>
+          </tr>
+          <tr>
+            <td>Jurisdictional filter</td>
+            <td>Never use — describe outcome ("wins from your state")</td>
+            <td>Engineering term</td>
+          </tr>
+          <tr>
+            <td>W-2G threshold</td>
+            <td>Never use — irrelevant to UX research</td>
+            <td>Tax/regulatory term</td>
+          </tr>
+          <tr>
+            <td>Big Winner</td>
+            <td>"someone who won a large prize"</td>
+            <td>Internal product label</td>
+          </tr>
+          <tr>
+            <td>Multi-state game</td>
+            <td>"a lottery game available in multiple states, like Powerball"</td>
+            <td>Describe, don't label</td>
+          </tr>
+          <tr>
+            <td>CTR</td>
+            <td>Never use in participant copy</td>
+            <td>Analytics jargon</td>
+          </tr>
+          <tr>
+            <td>Game detail page</td>
+            <td>"the page for that game"</td>
+            <td>Functional description</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
