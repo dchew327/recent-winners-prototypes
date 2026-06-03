@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token FAB Flow - Option 4</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0A0F18;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-container {
+            width: 100vw;
+            height: 100vh;
+            background: #F3F6F9;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        @media (min-width: 431px) {
+            .mobile-container {
+                border-radius: 40px;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+                width: 390px;
+                height: 844px;
+            }
+        }
+
+        /* Phone frame wrapper for FAB positioning */
+        .phone-frame {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .jp-header {
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .jp-header img {
+            width: 100%;
+            display: block;
+        }
+
+        .home-content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 90px; /* Space for bottom nav */
+        }
+
+        .marketing-carousel {
+            width: 100%;
+            flex-shrink: 0;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            padding: 16px 0 0 16px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            position: relative;
+        }
+
+        .marketing-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .carousel-container {
+            display: inline-flex;
+            gap: 8px;
+            padding-right: 16px;
+            padding-bottom: 16px;
+        }
+
+        .carousel-container img {
+            width: 257px;
+            height: 144px;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        .section-title {
+            width: 100%;
+            flex-shrink: 0;
+            padding: 0 24px 12px 24px;
+        }
+
+        .section-title h2 {
+            font-family: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            font-weight: 400;
+            color: #ABABAB;
+            margin: 0;
+            letter-spacing: 0;
+        }
+
+        .lottery-games,
+        .add-funds,
+        .strapline,
+        .card-group {
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            padding: 0 24px 16px 24px;
+        }
+
+        .lottery-games img,
+        .add-funds img,
+        .strapline img,
+        .card-group img {
+            width: 100%;
+            max-width: 343px;
+            display: block;
+        }
+
+        .bottom-nav {
+            width: 100%;
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .bottom-nav img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Keno Drawer */
+        .drawer-scrim {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 80;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer-scrim.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .keno-drawer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 90;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 40px 40px 0 0;
+            overflow: hidden;
+        }
+
+        .keno-drawer.open {
+            transform: translateY(0);
+        }
+
+        .keno-drawer-img {
+            width: 100%;
+            display: block;
+        }
+
+        .keno-drawer-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        .powerball-drawer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 70;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .powerball-drawer.open {
+            transform: translateY(0);
+        }
+        .powerball-drawer img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+        .powerball-drawer {
+            cursor: pointer;
+        }
+
+        /* Recent Winners Widget */
+        .recent-winners-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0 16px 16px 16px;
+            flex-shrink: 0;
+        }
+
+        .recent-winners-widget {
+            width: 100%;
+            max-width: 340px;
+            height: 148px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 0;
+            gap: 8px;
+            background: url('Assets/BG.png') center / cover no-repeat;
+            position: relative;
+        }
+
+/* Floating coin/dollar elements */
+        .float-asset {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float-a {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-7px); }
+        }
+        @keyframes float-b {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-5px); }
+        }
+        @keyframes float-c {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-8px); }
+        }
+        @keyframes float-d {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-6px); }
+        }
+        @keyframes float-e {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-5px); }
+        }
+        @keyframes dollar-pulse {
+            0%, 100% { filter: brightness(1); }
+            50%       { filter: brightness(1.35); }
+        }
+
+        .dollar-shimmer-wrap {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .winners-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            flex-shrink: 0;
+            padding: 0 12px;
+            position: relative;
+            z-index: 2;
+            height: 44px;
+            overflow: hidden;
+        }
+
+        .winners-subtitle {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-size: 8px;
+            font-weight: 600;
+            color: #00FF62;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .winners-title {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 28px;
+        }
+
+        .winners-location {
+            margin-top: 2px;
+            line-height: 14px;
+            font-size: 12px;
+        }
+
+        .winners-from {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-weight: 500;
+            color: #FFFFFF;
+            text-transform: uppercase;
+        }
+
+        .winners-city {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-weight: 700;
+            color: #00FFF6;
+            text-transform: uppercase;
+        }
+
+        .add-btn {
+            width: 58px;
+            height: 24px;
+            flex-shrink: 0;
+            margin-left: 16px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.7);
+            border: 0.8px solid rgba(255,255,255,0.5);
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: #131415;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            white-space: nowrap;
+        }
+
+        .winners-ticker-wrapper {
+            overflow: hidden;
+            flex-shrink: 0;
+            height: 72px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .winners-ticker-track {
+            display: flex;
+            gap: 8px;
+            animation: ticker-scroll 50s linear infinite;
+            width: max-content;
+        }
+
+        @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Option 2: dark blue card */
+        .winner-card {
+            height: 72px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .winner-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .winner-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .winner-game {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+
+        .winner-prize {
+            font-family: 'Proxima Nova', -apple-system, sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #00FFF6;
+            line-height: 1.25;
+        }
+
+        .winner-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .winner-time {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 13px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .winner-time img {
+            filter: brightness(0) invert(1);
+            flex-shrink: 0;
+        }
+
+        .winner-divider {
+            opacity: 0.5;
+            margin: 0 2px;
+        }
+
+        .fab-cart {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(calc(100% + 90px));
+            width: 360px;
+            z-index: 70;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        .fab-cart.open {
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .fab-cart img {
+            width: 100%;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Password Gate -->
+    <style>
+        #gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0A0F18;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        #gate-overlay.hidden { display: none; }
+        .gate-card {
+            background: #1A2537; border-radius: 16px;
+            padding: 40px 32px; width: 320px; max-width: 90vw;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+        }
+        .gate-title { font-size: 18px; font-weight: 700; color: #fff; text-align: center; }
+        .gate-subtitle { font-size: 14px; color: rgba(255,255,255,0.45); text-align: center; margin-top: -12px; }
+        .gate-input {
+            width: 100%; padding: 12px 16px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+            color: #fff; font-size: 16px; outline: none;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        .gate-input:focus { border-color: rgba(255,255,255,0.3); }
+        .gate-btn {
+            width: 100%; padding: 14px; border-radius: 10px;
+            background: #1976D2; border: none; color: #fff;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        .gate-btn:hover { background: #1565C0; }
+        .gate-error { font-size: 13px; color: #ff6b6b; display: none; }
+        .gate-error.visible { display: block; }
+        .gate-expired { font-size: 15px; color: rgba(255,255,255,0.55); text-align: center; }
+    </style>
+    <div id="gate-overlay">
+        <div class="gate-card" id="gate-password-card">
+            <div class="gate-title">Protected Prototype</div>
+            <div class="gate-subtitle">Enter the password to continue</div>
+            <input class="gate-input" id="gate-input" type="password" placeholder="Password" autocomplete="off">
+            <div class="gate-error" id="gate-error">Incorrect password. Please try again.</div>
+            <button class="gate-btn" id="gate-submit">Continue</button>
+        </div>
+        <div class="gate-card" id="gate-expired-card" style="display:none;">
+            <div class="gate-title">Link Expired</div>
+            <div class="gate-expired">This prototype link is no longer active.<br>The testing period has ended.</div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const EXPIRY = new Date('2026-06-20T23:59:59');
+            const HASH = 'eae761b6be5ae86f778810ec8c4f6b2b21676d94b545876f595c8a939938f03f';
+            const overlay = document.getElementById('gate-overlay');
+            const pwCard = document.getElementById('gate-password-card');
+            const expCard = document.getElementById('gate-expired-card');
+            if (sessionStorage.getItem('unlocked') === 'true') { overlay.classList.add('hidden'); return; }
+            if (new Date() > EXPIRY) { pwCard.style.display = 'none'; expCard.style.display = 'flex'; return; }
+            async function checkPassword() {
+                const val = document.getElementById('gate-input').value;
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
+                const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+                if (hex === HASH) { sessionStorage.setItem('unlocked', 'true'); overlay.classList.add('hidden'); }
+                else { document.getElementById('gate-error').classList.add('visible'); document.getElementById('gate-input').value = ''; }
+            }
+            document.getElementById('gate-submit').addEventListener('click', checkPassword);
+            document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+        })();
+    </script>
+    <div class="mobile-container">
+        <!-- JP Header -->
+        <div class="jp-header">
+            <img src="../Lottery Tokenization/Assets/JP Header.png" alt="Jackpocket Header">
+        </div>
+
+        <!-- Phone Frame (contains content and FAB) -->
+        <div class="phone-frame">
+            <!-- Home Content -->
+            <div class="home-content">
+            <!-- Marketing Carousel -->
+            <div class="marketing-carousel">
+                <div class="carousel-container">
+                    <img src="Assets/CarouselCard.png" alt="Carousel Card">
+                    <img src="Assets/Sign Up Carousel Card.png" alt="Sign Up Carousel Card">
+                </div>
+            </div>
+
+            <!-- Recent Winners Widget -->
+            <div class="recent-winners-section">
+                <div class="recent-winners-widget">
+                    <!-- Floating coins — pixel-accurate positions from Recent Winners Widget BG.png -->
+                    <img src="Assets/Coin.png" class="float-asset" style="width:16px;left:0px;top:64px;transform:rotate(13deg);animation:float-d 2.8s ease-in-out infinite;animation-delay:0s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:14px;left:194px;top:99px;transform:rotate(-9deg);animation:float-e 2.9s ease-in-out infinite;animation-delay:1.4s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:26px;left:208px;top:18px;transform:rotate(-13deg);animation:float-a 3.2s ease-in-out infinite;animation-delay:0.6s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:14px;left:240px;top:78px;transform:rotate(-6deg);animation:float-b 3.0s ease-in-out infinite;animation-delay:1.8s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:16px;left:250px;top:117px;transform:rotate(4deg);animation:float-c 2.6s ease-in-out infinite;animation-delay:0.2s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:14px;left:255px;top:53px;transform:rotate(-9deg);animation:float-a 3.5s ease-in-out infinite;animation-delay:1.1s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:18px;left:273px;top:27px;transform:rotate(-15deg);animation:float-d 2.8s ease-in-out infinite;animation-delay:2.0s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:18px;left:294px;top:0px;transform:rotate(-20deg);animation:float-b 3.2s ease-in-out infinite;animation-delay:0.9s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:16px;left:313px;top:18px;transform:rotate(8deg);animation:float-e 3.0s ease-in-out infinite;animation-delay:1.5s;">
+                    <img src="Assets/Coin.png" class="float-asset" style="width:26px;left:317px;top:118px;transform:rotate(4deg);animation:float-c 3.5s ease-in-out infinite;animation-delay:0.4s;z-index:0;">
+                    <!-- Small blurred dollar sign (top of widget, matching BG reference) -->
+                    <img src="Assets/Dollar sign.png" class="float-asset" style="width:22px;left:272px;top:-6px;filter:blur(1.5px);opacity:0.5;">
+                    <!-- Main dollar sign — subtle brightness pulse -->
+                    <div class="dollar-shimmer-wrap" style="width:39px;height:52px;left:301px;top:16px;">
+                        <img src="Assets/Dollar sign.png" style="width:100%;height:100%;object-fit:contain;display:block;animation:dollar-pulse 5s ease-in-out infinite;">
+                    </div>
+                    <div class="winners-header">
+                        <span class="winners-title">Recent Winners</span>
+                        <div class="winners-location">
+                            <span class="winners-from">From </span><span class="winners-city">New York</span>
+                        </div>
+                    </div>
+                    <div class="winners-ticker-wrapper">
+                        <div class="winners-ticker-track" id="tickerTrack">
+                            <div class="winner-card" style="width:210px;cursor:pointer;">
+                                <div class="winner-avatar">
+                                    <img src="Assets/Keno Image.png" alt="Keno" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                                <div class="winner-info">
+                                    <span class="winner-game">Keno</span>
+                                    <span class="winner-prize">$100,000</span>
+                                    <div class="winner-meta">
+                                        <span class="winner-time"><img src="Assets/Clock.svg" alt="" width="10" height="10">12 min. ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="winner-card" style="width:266px;">
+                                <div class="winner-avatar">
+                                    <img src="Assets/Game of Thrones Image.png" alt="Game Of Thrones" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                                <div class="winner-info">
+                                    <span class="winner-game">Game Of Thrones</span>
+                                    <span class="winner-prize">$85,000</span>
+                                    <div class="winner-meta">
+                                        <span class="winner-time"><img src="Assets/Clock.svg" alt="" width="10" height="10">30 min. ago</span>
+                                    </div>
+                                </div>
+                                <img src="Assets/Plus button.svg" alt="Add" class="add-btn-trigger" style="width:32px;height:32px;flex-shrink:0;margin-left:16px;cursor:pointer;">
+                            </div>
+                            <div class="winner-card" style="width:265px;">
+                                <div class="winner-avatar">
+                                    <img src="Assets/Powerball Image.png" alt="Powerball" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                                <div class="winner-info">
+                                    <span class="winner-game">Powerball</span>
+                                    <span class="winner-prize">$1,000,000</span>
+                                    <div class="winner-meta">
+                                        <span class="winner-time"><img src="Assets/Clock.svg" alt="" width="10" height="10">5 days ago<span class="winner-divider">|</span>New York</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="winner-card" style="width:254px;">
+                                <div class="winner-avatar">
+                                    <img src="Assets/Break The Bank.png" alt="Break The Bank" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                                <div class="winner-info">
+                                    <span class="winner-game">Break The Bank</span>
+                                    <span class="winner-prize">$50,000</span>
+                                    <div class="winner-meta">
+                                        <span class="winner-time"><img src="Assets/Clock.svg" alt="" width="10" height="10">45 min. ago</span>
+                                    </div>
+                                </div>
+                                <img src="Assets/Plus button.svg" alt="Add" class="add-btn-trigger" style="width:32px;height:32px;flex-shrink:0;margin-left:16px;cursor:pointer;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Games Title -->
+            <div class="section-title">
+                <h2>Featured Games</h2>
+            </div>
+
+            <!-- Lottery Games -->
+            <div class="lottery-games">
+                <img src="../Lottery Tokenization/Assets/Lottery Games.svg" alt="Lottery Games">
+            </div>
+
+            <!-- Add Funds -->
+            <div class="add-funds">
+                <img src="../Lottery Tokenization/Assets/Add Funds.svg" alt="Add Funds">
+            </div>
+
+            <!-- Strapline -->
+            <div class="strapline">
+                <img src="../Lottery Tokenization/Assets/Strapline.svg" alt="Win Austin">
+            </div>
+
+            <!-- Card Group - Scratch -->
+            <div class="card-group">
+                <img src="../Lottery Tokenization/Assets/Card Group - Scratch - Native.svg" alt="Scratch Games">
+            </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <img src="../Lottery Tokenization/Assets/Bottom Navigation Bar with Promotions.svg" alt="Bottom Navigation">
+            </div>
+
+        </div>
+
+        <!-- Keno Drawer Scrim -->
+        <div class="drawer-scrim" id="kenoScrim" onclick="closeDrawer()"></div>
+
+        <!-- Keno Drawer -->
+        <div class="keno-drawer" id="kenoDrawer">
+            <img src="Assets/Keno OR Drawer.svg" alt="Keno" class="keno-drawer-img">
+            <button class="keno-drawer-close" onclick="closeDrawer()" aria-label="Close"></button>
+        </div>
+
+        <!-- FAB View Cart -->
+        <div class="fab-cart" id="fabCart">
+            <svg width="360" height="64" viewBox="0 0 360 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g filter="url(#filter0_d_2293_30313)">
+            <rect x="8" y="6" width="344" height="48" rx="12" fill="#1976D2"/>
+            <rect x="16" y="14" width="19" height="32" rx="4" fill="#1565C0"/>
+            <text id="fabCount" x="25.5" y="35" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="700" fill="white">1</text>
+            <path d="M151.365 35H148.517L144.389 24.328H146.981L149.941 32.536L152.885 24.328H155.477L151.365 35ZM157.422 26.44C156.766 26.44 156.206 25.896 156.206 25.224C156.206 24.552 156.766 24.024 157.422 24.024C158.094 24.024 158.638 24.552 158.638 25.224C158.638 25.896 158.094 26.44 157.422 26.44ZM158.446 35H156.414V27.272H158.446V35ZM164.093 35.192C161.741 35.192 159.965 33.608 159.965 31.128C159.965 28.888 161.613 27.08 163.965 27.08C166.269 27.08 167.837 28.808 167.837 31.336V31.784H162.093C162.221 32.76 163.005 33.576 164.317 33.576C164.973 33.576 165.885 33.288 166.381 32.808L167.277 34.12C166.509 34.824 165.293 35.192 164.093 35.192ZM165.869 30.408C165.821 29.672 165.309 28.696 163.965 28.696C162.701 28.696 162.157 29.64 162.061 30.408H165.869ZM178.249 35H176.089L174.457 29.736L172.825 35H170.649L168.297 27.272H170.409L171.849 32.472L173.545 27.272H175.353L177.049 32.472L178.489 27.272H180.601L178.249 35ZM190.912 35.192C187.712 35.192 185.232 32.952 185.232 29.672C185.232 26.392 187.712 24.152 190.912 24.152C193.264 24.152 194.624 25.432 195.376 26.76L193.424 27.72C192.976 26.856 192.016 26.168 190.912 26.168C188.976 26.168 187.568 27.656 187.568 29.672C187.568 31.688 188.976 33.176 190.912 33.176C192.016 33.176 192.976 32.504 193.424 31.624L195.376 32.568C194.608 33.896 193.264 35.192 190.912 35.192ZM203.352 35H201.32V34.2C200.792 34.824 199.88 35.192 198.872 35.192C197.64 35.192 196.184 34.36 196.184 32.632C196.184 30.824 197.64 30.136 198.872 30.136C199.896 30.136 200.808 30.472 201.32 31.08V30.04C201.32 29.256 200.648 28.744 199.624 28.744C198.792 28.744 198.024 29.048 197.368 29.656L196.6 28.296C197.544 27.464 198.76 27.08 199.976 27.08C201.736 27.08 203.352 27.784 203.352 30.008V35ZM199.688 33.816C200.344 33.816 200.984 33.592 201.32 33.144V32.184C200.984 31.736 200.344 31.512 199.688 31.512C198.888 31.512 198.232 31.928 198.232 32.68C198.232 33.4 198.888 33.816 199.688 33.816ZM207.399 35H205.367V27.272H207.399V28.328C207.943 27.64 208.903 27.08 209.863 27.08V29.064C209.719 29.032 209.527 29.016 209.303 29.016C208.631 29.016 207.735 29.4 207.399 29.896V35ZM213.725 35.192C212.301 35.192 211.533 34.456 211.533 33.08V29.048H210.253V27.272H211.533V25.16H213.581V27.272H215.149V29.048H213.581V32.536C213.581 33.016 213.837 33.384 214.285 33.384C214.589 33.384 214.877 33.272 214.989 33.16L215.421 34.696C215.117 34.968 214.573 35.192 213.725 35.192Z" fill="white"/>
+            <rect x="312" y="14" width="32" height="32" rx="4" fill="#1565C0"/>
+            <text id="fabPrice" x="328" y="35" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="white">$2</text>
+            </g>
+            <defs>
+            <filter id="filter0_d_2293_30313" x="0" y="0" width="360" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset dy="2"/>
+            <feGaussianBlur stdDeviation="4"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2293_30313"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2293_30313" result="shape"/>
+            </filter>
+            </defs>
+            </svg>
+        </div>
+
+        <!-- Powerball Landing Drawer — tap anywhere to close -->
+        <div class="powerball-drawer" id="powerballDrawer" onclick="closePowerballDrawer()">
+            <img src="Assets/Powerball Landing.svg" alt="Powerball">
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.marketing-carousel').scrollLeft = 0;
+            // Duplicate ticker cards for seamless infinite loop
+            const track = document.getElementById('tickerTrack');
+            track.innerHTML += track.innerHTML;
+
+            // Event delegation for ticker cards (handles both original + cloned)
+            track.addEventListener('click', function(e) {
+                const card = e.target.closest('.winner-card');
+                if (!card) return;
+                const game = card.querySelector('.winner-game')?.textContent?.trim();
+                if (game === 'Keno') openDrawer();
+                if (game === 'Powerball') openPowerballDrawer();
+            });
+
+            // Add buttons — use event delegation on ticker for cloned cards too
+            track.addEventListener('click', function(e) {
+                if (e.target.closest('.add-btn-trigger')) {
+                    addToCart();
+                }
+            });
+        });
+
+        function openDrawer() {
+            document.getElementById('kenoDrawer').classList.add('open');
+            document.getElementById('kenoScrim').classList.add('open');
+        }
+
+        function closeDrawer() {
+            document.getElementById('kenoDrawer').classList.remove('open');
+            document.getElementById('kenoScrim').classList.remove('open');
+        }
+
+        function openPowerballDrawer() {
+            document.getElementById('powerballDrawer').classList.add('open');
+        }
+
+        function closePowerballDrawer() {
+            document.getElementById('powerballDrawer').classList.remove('open');
+        }
+
+        let fabCount = 0;
+        const FAB_PRICE_PER_ITEM = 2;
+
+        function addToCart() {
+            fabCount++;
+            document.getElementById('fabCount').textContent = fabCount;
+            document.getElementById('fabPrice').textContent = '$' + (fabCount * FAB_PRICE_PER_ITEM);
+            document.getElementById('fabCart').classList.add('open');
+        }
+
+        function showFab() {
+            document.getElementById('fabCart').classList.add('open');
+        }
+    </script>
+</body>
+</html>
